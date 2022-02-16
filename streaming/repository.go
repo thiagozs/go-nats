@@ -1,6 +1,6 @@
 package streaming
 
-import "nats-go/nats"
+import "github.com/thiagozs/go-nats/nats"
 
 type StreamingServiceRepo interface {
 	//Register(name string, service nats.NatsServiceRepo) *repoStream

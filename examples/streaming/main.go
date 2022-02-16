@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"nats-go/nats"
-	"nats-go/streaming"
 	"sync"
 	"time"
+
+	"github.com/thiagozs/go-nats/nats"
+	"github.com/thiagozs/go-nats/streaming"
 )
 
 type ServerID int

@@ -1,6 +1,6 @@
-module nats-go
+module github.com/thiagozs/go-nats
 
-go 1.14
+go 1.17
 
 require github.com/nats-io/nuid v1.0.1
 

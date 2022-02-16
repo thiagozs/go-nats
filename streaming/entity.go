@@ -1,7 +1,7 @@
 package streaming
 
 import (
-	"nats-go/nats"
+	"github.com/thiagozs/go-nats/nats"
 
 	"github.com/nats-io/stan.go"
 )

@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"nats-go/nats"
-	"nats-go/streaming"
 	"time"
+
+	"github.com/thiagozs/go-nats/nats"
+	"github.com/thiagozs/go-nats/streaming"
 )
 
 func main() {

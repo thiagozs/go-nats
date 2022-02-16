@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"nats-go/nats"
 	"strconv"
 	"time"
 
 	"github.com/nats-io/stan.go"
+	"github.com/thiagozs/go-nats/nats"
 )
 
 func main() {

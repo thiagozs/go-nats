@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"nats-go/nats"
 	"strconv"
 	"time"
+
+	"github.com/thiagozs/go-nats/nats"
 
 	"github.com/nats-io/stan.go"
 )
