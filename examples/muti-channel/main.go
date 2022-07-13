@@ -155,6 +155,7 @@ func startBroker1() (nats.NatsServiceRepo, error) {
 func loadBroker(serverName string) (nats.NatsServiceRepo, error) {
 	var server nats.NatsServiceRepo
 	var err error
+
 	switch serverName {
 	case Broker1.String():
 		server, err = startBroker1()
