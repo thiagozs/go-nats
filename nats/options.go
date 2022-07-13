@@ -1,17 +1,24 @@
 package nats
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/nats-io/stan.go"
+	"github.com/newrelic/go-agent/v3/integrations/nrstan"
+	"github.com/newrelic/go-agent/v3/newrelic"
 )
 
 type Options func(*Config)
-type OptionsHandler func(*ConfigOptionsHandler)
 
-type ConfigOptionsHandler struct {
+type SubsOptHandler func(*SubsOptionsHandler)
+
+type SubsOptionsHandler struct {
 	DurableName, MaxInFlight,
-	AckWait, ManualAckMode stan.SubscriptionOption
+	AckWait, ManualAckMode,
+	StartWithLastReceived,
+	StartAtSequence stan.SubscriptionOption
+	SubWrapper func(ch chan<- interface{}) func(msg *stan.Msg)
 }
 
 type Config struct {
@@ -25,7 +32,7 @@ type Config struct {
 	ConnLostHandler func(conn stan.Conn, reason error)
 	MessageHandler  func(msg *stan.Msg)
 	ConnNats        stan.Conn
-	CfgHandler      ConfigOptionsHandler
+	SubsOpts        SubsOptionsHandler
 }
 
 func NewOptions(opts ...Options) Config {
@@ -97,43 +104,81 @@ func MaxInFlight(num int) Options {
 }
 
 /*
- * ConfigOptionsHandler ***************************
+ * NewSubsOpts ***************************
  * ------------------------------------------------
- * Configuration for a custom handler. First
+ * Configuration for a custom SubsOptionsHandler. First
  * implementation request and settings.
  */
 
-func OptsHandler(opts ...OptionsHandler) Options {
+func NewSubsOpts(opts ...SubsOptHandler) Options {
 	return func(o *Config) {
-		opt := ConfigOptionsHandler{}
+		opt := SubsOptionsHandler{}
 		for _, oo := range opts {
 			oo(&opt)
 		}
+		o.SubsOpts = opt
 	}
 }
 
-func SetAckWait(duration time.Duration) OptionsHandler {
-	return func(o *ConfigOptionsHandler) {
+func SetAckWait(duration time.Duration) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
 		o.AckWait = stan.AckWait(duration)
 	}
 }
 
-func SetDurableName(name string) OptionsHandler {
-	return func(o *ConfigOptionsHandler) {
+func SetDurableName(name string) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
 		o.DurableName = stan.DurableName(name)
 	}
 }
 
-func SetMaxInFlight(numMessage int) OptionsHandler {
-	return func(o *ConfigOptionsHandler) {
+func SetMaxInFlight(numMessage int) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
 		o.MaxInFlight = stan.MaxInflight(numMessage)
 	}
 }
 
-func SetManualAckMode(isManual bool) OptionsHandler {
-	return func(o *ConfigOptionsHandler) {
+func SetManualAckMode(isManual bool) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
 		if isManual {
+			fmt.Println("SetManualAckMode ManualAckMode")
 			o.ManualAckMode = stan.SetManualAckMode()
+			fmt.Printf("Content : %+v - Is nil ? %t\n", o.ManualAckMode, o.ManualAckMode == nil)
+			return
 		}
+		o.ManualAckMode = nil
+	}
+}
+
+func SetSubWrapper(nr *newrelic.Application) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
+		o.SubWrapper = func(ch chan<- interface{}) func(msg *stan.Msg) {
+			return nrstan.StreamingSubWrapper(nr, func(msg *stan.Msg) {
+				if o.ManualAckMode == nil {
+					msg.Ack()
+				}
+				ch <- MessageCh{msg, msg.Data}
+			})
+		}
+	}
+}
+
+func SetStartWithLastReceived(isManual bool) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
+		if isManual {
+			o.StartWithLastReceived = stan.StartWithLastReceived()
+			return
+		}
+		o.StartWithLastReceived = nil
+	}
+}
+
+func SetStartAtSequence(sequence uint64) SubsOptHandler {
+	return func(o *SubsOptionsHandler) {
+		if sequence > 0 {
+			o.StartAtSequence = stan.StartAtSequence(sequence)
+			return
+		}
+		o.StartAtSequence = nil
 	}
 }

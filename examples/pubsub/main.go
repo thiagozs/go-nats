@@ -5,9 +5,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/thiagozs/go-nats/nats"
-
 	"github.com/nats-io/stan.go"
+	"github.com/thiagozs/go-nats/nats"
 )
 
 func main() {
@@ -27,16 +26,6 @@ func main() {
 			fmt.Println("Subscriber> Got task request on:", msg.Subject)
 			fmt.Println("Subscriber> Message:", string(msg.Data))
 		}),
-
-		// If you need to customize this services,
-		// just set a group default handlers wrapper.
-		//
-		// nats.OptsHandler(
-		// 	nats.SetAckWait(60),
-		// 	nats.SetDurableName("durable-name"),
-		// 	nats.SetMaxInFlight(20),
-		// 	nats.SetManualAckMode(true),
-		// ),
 	}
 
 	ns, err := nats.NewService(opts...)

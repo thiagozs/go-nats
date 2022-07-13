@@ -2,7 +2,7 @@
 
 ## Stack of project
 
-* golang v 1.14.4
+* golang v 1.17
 * nast.io streaming driver
 * docker-ce
 * docker-composer
@@ -28,15 +28,6 @@ nats.MessageHandler(func(msg *stan.Msg) {
 	fmt.Println("Subscriber> Message:", string(msg.Data))
 }),
 
-// If you need to customize this services,
-// just set a group default handlers wrapper.
-//
-// nats.OptsHandler(
-// 	nats.SetAckWait(60),
-// 	nats.SetDurableName("durable-name"),
-// 	nats.SetMaxInFlight(20),
-// 	nats.SetManualAckMode(true),
-// ),
 }
 
 ```
@@ -92,9 +83,13 @@ Create a new instance
 
 ```go
 // Create a new Instance wrapper streaming
-stm := streaming.NewService()
-// Register the servers here
-stm.Register("anchor", server)
+	nt, err := nats.NewService(opts...)
+	if err != nil {
+		panic(err)
+	}
+
+	st := streaming.NewService(nt)
+	// st.Register("anchor", nt)
 ```
 
 ### Register a channels
@@ -104,10 +99,10 @@ Subscriber the channels
 ```go
 // Create a list of subscribers for register and listening
 subscribers := []interface{}{
-    stm.Subscribe("anchor", Candle1.String()),
-    stm.Subscribe("anchor", Candle2.String()),
-    stm.Subscribe("anchor", Candle3.String()),
-    stm.Subscribe("anchor", Candle4.String()),
+    stm.Subscribe(Candle1.String()),
+    stm.Subscribe(Candle2.String()),
+    stm.Subscribe(Candle3.String()),
+    stm.Subscribe(Candle4.String()),
 }
 
 // Register all subscribers
@@ -135,16 +130,16 @@ for i := 1; i <= 10; i++ {
 ```go
 for {
     select {
-        case cl1 := <-stm.GetMessage("anchor", Candle1.String()):
+        case cl1 := <-stm.GetMessage(Candle1.String()):
         fmt.Println("Candle1 =", string(cl1))
 
-        case cl2 := <-stm.GetMessage("anchor", Candle2.String()):
+        case cl2 := <-stm.GetMessage(Candle2.String()):
         fmt.Println("Candle2 =", string(cl2))
 
-        case cl3 := <-stm.GetMessage("anchor", Candle3.String()):
+        case cl3 := <-stm.GetMessage(Candle3.String()):
         fmt.Println("Candle3 =", string(cl3))
 
-        case cl4 := <-stm.GetMessage("anchor", Candle4.String()):
+        case cl4 := <-stm.GetMessage(Candle4.String()):
         fmt.Println("Candle4 =", string(cl4))
 
         case <-time.After(time.Duration(5) * time.Second):
@@ -161,33 +156,6 @@ for {
 if err := stream.Unsubscribe(Dev.String(), channel); err != nil {
     fmt.Println(err)
 }
-```
-
-## Directories
-
-```sh
-.
-├── LICENSE
-├── README.md
-├── docker-compose.yml
-├── examples
-│   ├── pubsub
-│   │   └── main.go
-│   └── streaming
-│       └── main.go
-├── go.mod
-├── go.sum
-├── main.go
-├── nats
-│   ├── entity.go
-│   ├── nats.go
-│   ├── options.go
-│   └── repository.go
-└── streaming
-    ├── entity.go
-    ├── repository.go
-    └── streaming.go
-
 ```
 
 ## Examples code

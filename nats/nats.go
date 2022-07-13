@@ -81,15 +81,20 @@ func (r *repoNats) checkConnIsValid() bool {
 	return false
 }
 func (r *repoNats) conn() error {
-	sc, err := stan.Connect(
-		r.opts.ClusterName,
-		r.opts.ClusterID,
+	opts := []stan.Option{
 		stan.Pings(r.opts.PingParams.TTLA, r.opts.PingParams.TTLB),
 		stan.MaxPubAcksInflight(r.opts.MaxInFlight),
 		stan.PubAckWait(r.opts.PubAckWait),
 		stan.NatsURL(strings.Join([]string{r.opts.NatsURL, r.opts.NatsPort}, ":")),
 		stan.SetConnectionLostHandler(r.opts.ConnLostHandler),
+	}
+
+	sc, err := stan.Connect(
+		r.opts.ClusterName,
+		r.opts.ClusterID,
+		opts...,
 	)
+
 	if err != nil {
 		return err
 	}
@@ -150,13 +155,7 @@ func (r *repoNats) DeliverAllAvailable() stan.SubscriptionOption {
 	return stan.DeliverAllAvailable()
 }
 
-// CustomSubscriptionOptions wrapper for a custom subscription options
-func (r *repoNats) CustomSubscriptionOptions() []stan.SubscriptionOption {
-	//TODO: improvement this method
-	return []stan.SubscriptionOption{
-		r.opts.CfgHandler.AckWait,
-		r.opts.CfgHandler.DurableName,
-		r.opts.CfgHandler.ManualAckMode,
-		r.opts.CfgHandler.MaxInFlight,
-	}
+// Get Opts configs
+func (r *repoNats) GetOpts() *Config {
+	return &r.opts
 }

@@ -16,5 +16,5 @@ type NatsServiceRepo interface {
 	ConnectedAddr() string
 	ConnectedServerId() string
 	DeliverAllAvailable() stan.SubscriptionOption
-	CustomSubscriptionOptions() []stan.SubscriptionOption
+	GetOpts() *Config
 }
