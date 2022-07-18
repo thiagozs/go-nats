@@ -85,8 +85,13 @@ func (r *repoNats) conn() error {
 		stan.Pings(r.opts.PingParams.TTLA, r.opts.PingParams.TTLB),
 		stan.MaxPubAcksInflight(r.opts.MaxInFlight),
 		stan.PubAckWait(r.opts.PubAckWait),
-		stan.NatsURL(strings.Join([]string{r.opts.NatsURL, r.opts.NatsPort}, ":")),
 		stan.SetConnectionLostHandler(r.opts.ConnLostHandler),
+	}
+
+	if r.opts.NatsServer != "" {
+		opts = append(opts, stan.NatsURL(r.opts.NatsServer))
+	} else {
+		opts = append(opts, stan.NatsURL(strings.Join([]string{r.opts.NatsURL, r.opts.NatsPort}, ":")))
 	}
 
 	sc, err := stan.Connect(

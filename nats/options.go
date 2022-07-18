@@ -26,6 +26,7 @@ type Config struct {
 	ClusterID       string
 	PingParams      PingParameter
 	PubAckWait      time.Duration
+	NatsServer      string
 	NatsURL         string
 	NatsPort        string
 	MaxInFlight     int
@@ -70,6 +71,12 @@ func PubAckWait(time time.Duration) Options {
 func NastURL(url string) Options {
 	return func(o *Config) {
 		o.NatsURL = url
+	}
+}
+
+func NastServer(server string) Options {
+	return func(o *Config) {
+		o.NatsServer = server
 	}
 }
 
