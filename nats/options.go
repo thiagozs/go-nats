@@ -1,7 +1,6 @@
 package nats
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/nats-io/stan.go"
@@ -148,9 +147,7 @@ func SetMaxInFlight(numMessage int) SubsOptHandler {
 func SetManualAckMode(isManual bool) SubsOptHandler {
 	return func(o *SubsOptionsHandler) {
 		if isManual {
-			fmt.Println("SetManualAckMode ManualAckMode")
 			o.ManualAckMode = stan.SetManualAckMode()
-			fmt.Printf("Content : %+v - Is nil ? %t\n", o.ManualAckMode, o.ManualAckMode == nil)
 			return
 		}
 		o.ManualAckMode = nil
