@@ -40,10 +40,11 @@ func SetServerName(name string) StreamOpts {
 }
 
 type RepoStream struct {
-	Nats   map[string]nats.NatsServiceRepo
-	Chann  map[string]map[string]chan interface{}
-	Subs   map[string]map[string]stan.Subscription
-	Params StreamOptsParams
+	Nats    map[string]nats.NatsServiceRepo
+	Chann   map[string]map[string]chan interface{}
+	Subs    map[string]map[string]stan.Subscription
+	Params  StreamOptsParams
+	GetChan chan nats.MessageCh
 }
 
 // NewSevice start a streming wrapper
@@ -55,14 +56,15 @@ func NewService(natsService nats.NatsServiceRepo,
 		params.serverName = DEFAULT_NAME.String()
 	}
 
-	nats := make(map[string]nats.NatsServiceRepo)
-	nats[params.serverName] = natsService
+	natsr := make(map[string]nats.NatsServiceRepo)
+	natsr[params.serverName] = natsService
 
 	return &RepoStream{
-		Nats:   nats,
-		Chann:  make(map[string]map[string]chan interface{}),
-		Subs:   make(map[string]map[string]stan.Subscription),
-		Params: params,
+		Nats:    natsr,
+		Chann:   make(map[string]map[string]chan interface{}),
+		Subs:    make(map[string]map[string]stan.Subscription),
+		Params:  params,
+		GetChan: make(chan nats.MessageCh),
 	}
 }
 
@@ -213,28 +215,27 @@ func (s *RepoStream) Publish(payload nats.Message) error {
 }
 
 // GetMessage return a message from channel broadcast
-func (s *RepoStream) GetMessage(channel string) chan nats.MessageCh {
-	rr := make(chan nats.MessageCh)
-	go func() {
-		for {
-			select {
-			case msg := <-s.Chann[s.Params.serverName][channel]:
-				msgch, ok := msg.(nats.MessageCh)
-				if !ok {
-					continue
-				}
-				rr <- msgch
-			default:
+func (s *RepoStream) GetMessage(channel string) <-chan nats.MessageCh {
+	go s.monitoringCh(channel)
+	return s.GetChan
+}
+
+func (s *RepoStream) monitoringCh(channel string) {
+	for {
+		select {
+		case msg := <-s.Chann[s.Params.serverName][channel]:
+			msgch, ok := msg.(nats.MessageCh)
+			if !ok {
 				continue
 			}
+			go func(in nats.MessageCh) {
+				s.GetChan <- in
+			}(msgch)
 		}
-	}()
-
-	return rr
+	}
 }
 
 func (s *RepoStream) getSubsOpts(opts *nats.Config) []stan.SubscriptionOption {
-
 	subOpts := []stan.SubscriptionOption{}
 
 	if opts.SubsOpts.ManualAckMode != nil {

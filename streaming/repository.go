@@ -9,6 +9,6 @@ type StreamingServiceRepo interface {
 	SubscribeAll(arr []interface{})
 	Unsubscribe(channel string) error
 	Publish(payload nats.Message) error
-	GetMessage(channel string) chan nats.MessageCh
+	GetMessage(channel string) <-chan nats.MessageCh
 	Close() error
 }
