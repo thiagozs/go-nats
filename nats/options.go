@@ -67,19 +67,19 @@ func PubAckWait(time time.Duration) Options {
 	}
 }
 
-func NastURL(url string) Options {
+func NatsURL(url string) Options {
 	return func(o *Config) {
 		o.NatsURL = url
 	}
 }
 
-func NastServer(server string) Options {
+func NatsServer(server string) Options {
 	return func(o *Config) {
 		o.NatsServer = server
 	}
 }
 
-func NastPort(port string) Options {
+func NatsPort(port string) Options {
 	return func(o *Config) {
 		o.NatsPort = port
 	}

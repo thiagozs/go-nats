@@ -68,7 +68,7 @@ func NewService(natsService nats.NatsServiceRepo,
 	}
 }
 
-// Register method for subscription a new nast instance
+// Register method for subscription a new Nats instance
 func (s *RepoStream) Register(natsService nats.NatsServiceRepo) *RepoStream {
 	s.Nats[s.Params.serverName] = natsService
 	return s

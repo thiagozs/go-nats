@@ -52,7 +52,7 @@ func counter(channel string, mutex *sync.RWMutex) {
 }
 
 func main() {
-	// load a nast server, if you can use more than 1 server
+	// load a Nats server, if you can use more than 1 server
 	// just load other config and call this in one variable
 	server, err := loadBroker(Broker1.String())
 	if err != nil {
@@ -136,8 +136,8 @@ func startBroker1() (nats.NatsServiceRepo, error) {
 	opts := []nats.Options{
 		nats.ClusterName("test-cluster"),
 		nats.ClusterID("clusterID"),
-		nats.NastPort("4223"),
-		nats.NastURL("localhost"),
+		nats.NatsPort("4223"),
+		nats.NatsURL("localhost"),
 		nats.PubAckWait(30 * time.Second),
 		nats.MaxInFlight(20),
 		nats.PingParams(nats.PingParameter{
@@ -156,8 +156,7 @@ func loadBroker(serverName string) (nats.NatsServiceRepo, error) {
 	var server nats.NatsServiceRepo
 	var err error
 
-	switch serverName {
-	case Broker1.String():
+	if serverName == Broker1.String() {
 		server, err = startBroker1()
 	}
 

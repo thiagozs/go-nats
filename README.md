@@ -1,9 +1,9 @@
-# NAST Adapter Streaming tools
+# Nats Adapter Streaming tools
 
 ## Stack of project
 
 * golang v 1.17
-* nast.io streaming driver
+* Nats.io streaming driver
 * docker-ce
 * docker-composer
 
@@ -15,8 +15,8 @@
 opts := []nats.Options{
 nats.ClusterName("test-cluster"),
 nats.ClusterID("clusterID"),
-nats.NastPort("4223"),
-nats.NastURL("localhost"),
+nats.NatsPort("4223"),
+nats.NatsURL("localhost"),
 nats.PubAckWait(30 * time.Second),
 nats.MaxInFlight(20),
 nats.PingParams(nats.PingParameter{
@@ -34,7 +34,7 @@ nats.MessageHandler(func(msg *stan.Msg) {
 
 ### New Instance
 
-Start a new instrace of nast service.
+Start a new instrace of Nats service.
 
 ```go
 ns, err := nats.NewService(opts...)

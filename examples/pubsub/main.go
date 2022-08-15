@@ -14,8 +14,8 @@ func main() {
 	opts := []nats.Options{
 		nats.ClusterName("test-cluster"),
 		nats.ClusterID("clusterID"),
-		nats.NastPort("4223"),
-		nats.NastURL("localhost"),
+		nats.NatsPort("4223"),
+		nats.NatsURL("localhost"),
 		nats.PubAckWait(30 * time.Second),
 		nats.MaxInFlight(20),
 		nats.PingParams(nats.PingParameter{
